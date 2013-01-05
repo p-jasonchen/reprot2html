@@ -1,0 +1,3 @@
+<?xml version='1.0' encoding='utf-8' standalone='yes' ?><testsuites><testsuite name="com.example.demoapp.test.TestOperation"><testcase classname="com.example.demoapp.test.TestOperation" name="testOperationAdd" time="0.007"><failure message="junit.framework.AssertionFailedError: expected:&lt;131.0&gt; but was:&lt;31.0&gt;" type="junit.framework.AssertionFailedError">junit.framework.AssertionFailedError: expected:&lt;131.0&gt; but was:&lt;31.0&gt;
+	at com.example.demoapp.test.TestOperation.testOperationAdd(TestOperation.java:25)
+</failure></testcase></testsuite></testsuites>

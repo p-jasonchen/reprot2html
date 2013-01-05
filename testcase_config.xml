@@ -1,0 +1,17 @@
+﻿<!-- packageName is required-->
+
+ <classes appPkg="com.example.demoapp" testPkg="com.example.demoapp.test">
+	<class name="com.example.demoapp.test.TestOperation"> 
+        <methods>
+			<include name="testOperationAdd" />
+
+            <include name="testOperationDiv" />	
+
+			<include name="testOperationSub" />
+
+            <include name="testOperationMul" />				
+        </methods>
+
+    </class>
+
+</classes>
