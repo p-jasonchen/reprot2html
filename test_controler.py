@@ -29,6 +29,7 @@ class TestControler:
         appPath = configInfo.appPath
         testAppPath = configInfo.testAppPath
         
+        
         ret = True
         
         action = adb_action.AdbAction()        
@@ -65,7 +66,7 @@ class TestControler:
         parser = testcase_config_parser.TestCaseConfigParser('testcase_config.xml')
         parser.doParse()
         configInfo = parser.testCaseConfig
-        
+        self.reportInfo = parser.reportInfo
         ret = self.initPhoneEvn(configInfo)
         if not ret:
             print 'init phone env failed...'
@@ -99,7 +100,7 @@ class TestControler:
         resultParser = result_parser.ResultParser(self.dstPath)        
         resultParser.traverseAllResult(self.Report_File_Array)  
       
-        htmlCreator = html_creator.HtmlCreator(resultParser.testSuitMap)
+        htmlCreator = html_creator.HtmlCreator(resultParser.testSuitMap, self.reportInfo)
         htmlCreator.saveHtmlDoc()
         
 

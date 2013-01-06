@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #coding=utf-8
 import xml.dom.minidom
-
+import time
 class TestSuitInfo:
     def __init__(self, name, repeat = 1):
         self.name = name
@@ -23,18 +23,30 @@ class TestCaseConfigInfo:
         self.appPath = None
         self.testAppPath = None
         self.testSuits = []
-        
+
+
+class ReportInfo:
+    def __init__(self):
+        self.exector = 'unknow'
+        self.startTime =   time.time()        
+          
 class TestCaseConfigParser:
     def __init__(self,file=None):
         self.cofigFile = file
         self.testCaseConfig = TestCaseConfigInfo()
+        self.reportInfo = ReportInfo()
     def doParse(self):
         if(self.cofigFile == None):
             print 'TestCase config file must not be null'
             return
         dom = xml.dom.minidom.parse(self.cofigFile)        
-        pkgInfo = dom.documentElement;
-        if pkgInfo.nodeName == 'classes':
+        testInfo = dom.documentElement        
+        exector = testInfo.getAttribute('exector')
+        if exector != None and len(exector) > 0:
+            self.reportInfo.exector =  exector
+        pkgInfo = testInfo.getElementsByTagName('classes')
+        if len(pkgInfo) > 0:
+            pkgInfo = pkgInfo[0]
             appPkg = pkgInfo.getAttribute('appPkg')
             if len(appPkg) > 0:
                 self.testCaseConfig.appPkg = appPkg

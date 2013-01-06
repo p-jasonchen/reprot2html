@@ -3,7 +3,7 @@
 import xml.dom.minidom
 import codecs
 import result_parser
-
+import time
 class NodeInfo:
 	def __init__(self,tag, value = None,attrArray = None):
 		self.tag = tag
@@ -11,7 +11,7 @@ class NodeInfo:
 		self.value = value
 	
 class HtmlCreator:
-	def __init__(self, testSuitMap):
+	def __init__(self, testSuitMap, reportInfo):
 		self.testSuitMap = testSuitMap
 		impl = xml.dom.minidom.getDOMImplementation()
 		dom = impl.createDocument(None, 'html', None)
@@ -31,6 +31,7 @@ class HtmlCreator:
 		dom.documentElement.appendChild(body)
 		self.body = body
 
+		self.setReportInfo(reportInfo)
 		self.setAllCaseTestCaseTable()
 		self.setFailedCaseTestCaseTable()
 		self.setPassedCaseTestCaseTable()
@@ -53,6 +54,48 @@ class HtmlCreator:
 		else:
 			print 'node tag name must not be empty'
 			return None
+		
+	def setReportInfo(self, reportInfo):
+		dom = self.dom
+		tableNode = self.createNode(NodeInfo('table',None,[{'name':'class','value':'report_info'}]))
+		tr = self.createNode(NodeInfo('tr'))
+		
+		th = self.createNode(NodeInfo('th','Test Executor'))
+		tr.appendChild(th)
+		
+		th = self.createNode(NodeInfo('th','Start Time'))
+		tr.appendChild(th)
+		
+		th = self.createNode(NodeInfo('th','End Time'))
+		tr.appendChild(th)
+		
+		th = self.createNode(NodeInfo('th','Time Consumed(second)'))
+		tr.appendChild(th)
+		
+		tableNode.appendChild(tr)
+		
+		tr = self.createNode(NodeInfo('tr'))
+		
+		th = self.createNode(NodeInfo('td',reportInfo.exector))
+		tr.appendChild(th)
+		
+		startTimeTxt = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(reportInfo.startTime))
+		th = self.createNode(NodeInfo('td',startTimeTxt))
+		tr.appendChild(th)
+		
+		endTime = time.time()
+		endTimeTxt = time.strftime('%Y-%m-%d-%H-%M-%S',time.localtime(endTime))
+		th = self.createNode(NodeInfo('td',endTimeTxt))
+		tr.appendChild(th)
+		
+		timeConsumed = endTime - reportInfo.startTime
+		th = self.createNode(NodeInfo('td',timeConsumed))
+		print 'test consumes time :' + str(timeConsumed)
+		tr.appendChild(th)
+		
+		tableNode.appendChild(tr)
+		
+		self.body.appendChild(tableNode)
 		
 	def setAllCaseTestCaseTable(self):
 		testSuitMap = self.testSuitMap
