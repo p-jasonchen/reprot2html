@@ -9,7 +9,7 @@ import os
 class TestControler:   
     def __init__(self):
         self.dstPath =  os.path.join(os.getcwd(), 'result')    
-    
+        self.Report_File_Array = []
     def initEnv(self):    
         dstPath = self.dstPath
         if not os.path.exists(dstPath):
@@ -31,22 +31,26 @@ class TestControler:
         if configInfo.testPkg != None:
             testRunner = configInfo.testPkg + '/com.zutubi.android.junitreport.JUnitReportTestRunner'
             for testSuit in configInfo.testSuits:
+                repeat = testSuit.repeat               
                 testCaseArray = testSuit.testCaseArray
                 if len(testCaseArray) == 0:
-                    action = adb_action.AdbAction(testSuit.name, testRunner)   
-                    adbActionArray.append(action)
+                    for i in range(0, repeat):
+                        action = adb_action.AdbAction(testSuit.name, testRunner)   
+                        adbActionArray.append(action)
                 else:
                     for case in testCaseArray:
-                        action = adb_action.AdbAction(testSuit.name + '#' + case, testRunner)
-                        adbActionArray.append(action)
+                        for i in range(0, repeat):
+                            action = adb_action.AdbAction(testSuit.name + '#' + case, testRunner)
+                            adbActionArray.append(action)
 
+            print 'adbActionArray length:\t' + str(len(adbActionArray))
             for action in adbActionArray:
                 action.executeTest()
-                action.executePullTestResultFile()
+                self.Report_File_Array.append(action.executePullTestResultFile())
 
     def createHtmlResult(self):
         resultParser = result_parser.ResultParser(self.dstPath)        
-        resultParser.traverseAllResult()  
+        resultParser.traverseAllResult(self.Report_File_Array)  
       
         htmlCreator = html_creator.HtmlCreator(resultParser.testSuitMap)
         htmlCreator.saveHtmlDoc()
@@ -56,4 +60,5 @@ if __name__ == '__main__':
     controler = TestControler()
     controler.doTest()
     controler.createHtmlResult()
+    print 'test finished...'
     

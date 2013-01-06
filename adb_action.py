@@ -10,12 +10,11 @@ class AdbAction:
     #avd 管理工具所在目录
     ANDROID_TOOLS_HOME = "D:/develop/android-sdk-windows/tools/"
     
-    REPORT_FILE_COUNT = 1
-
+    REPORT_FILE_COUNT = 1  
+    
     def __init__(self, testSuit, testRunner):
         self.testSuit = testSuit
-        self.testRunner = testRunner
-        
+        self.testRunner = testRunner        
         
     def executeTest(self):
         commandLine = [AdbAction.ANDROID_PLATFORM_TOOLS_HOME + 'adb',
@@ -49,6 +48,7 @@ class AdbAction:
                             dstFile]
         p = subprocess.Popen(commandLine, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
         p.wait()
+        return dstFile
                                 
 if __name__ == '__main__':
     action = AdbAction('com.example.demoapp.test.TestOperation','com.example.demoapp.test/com.zutubi.android.junitreport.JUnitReportTestRunner')

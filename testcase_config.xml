@@ -1,8 +1,8 @@
 ﻿<!-- packageName is required-->
 
  <classes appPkg="com.example.demoapp" testPkg="com.example.demoapp.test">
-	<class name="com.example.demoapp.test.TestOperation"> 
-        <methods>
+	<class name="com.example.demoapp.test.TestOperation" repeat='10'> 
+        <methods >
 			<include name="testOperationAdd" />
 
             <include name="testOperationDiv" />	

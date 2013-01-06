@@ -3,9 +3,12 @@
 import xml.dom.minidom
 
 class TestSuitInfo:
-    def __init__(self, name):
+    def __init__(self, name, repeat = 1):
         self.name = name
         self.testCaseArray = []
+        if repeat == None:
+            repeat = 1
+        self.repeat = int(repeat)
     def appendTestCase(self, caseName):
         if caseName != None:
             self.testCaseArray.append(caseName)
@@ -43,9 +46,11 @@ class TestCaseConfigParser:
                 print 'package name of the test apk  must not be empty'
 
         domTestSuits = pkgInfo.getElementsByTagName('class')
+        
         for domTestSuit in domTestSuits:
             tsName = domTestSuit.getAttribute('name')
-            testSuit = TestSuitInfo(tsName)     
+            repeatValue = domTestSuit.getAttribute('repeat')          
+            testSuit = TestSuitInfo(tsName, repeatValue)     
             domMethod = domTestSuit.getElementsByTagName('methods')
             if len(domMethod) > 0:
                 domIncludes = domMethod[0].getElementsByTagName('include')

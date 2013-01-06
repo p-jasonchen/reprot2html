@@ -40,12 +40,12 @@ class HtmlCreator:
 		attrArray = info.attrArray
 		value = info.value
 		dom = self.dom
-		if tag and len(tag) > 0:
+		if tag != None and len(tag) > 0:
 			node = dom.createElement(tag)
 			if attrArray and len(attrArray) > 0:
 				for attr in attrArray:
 					node.setAttribute(attr['name'], attr['value'])
-			if value:				
+			if value != None:				
 				value = str(value)
 				text = dom.createTextNode(value)
 				node.appendChild(text)
@@ -155,12 +155,14 @@ class HtmlCreator:
 		tr.appendChild(th)	
 		
 		
-		tableNode.appendChild(tr)		
+		tableNode.appendChild(tr)
+		hasPassedCase = False
 		if testSuitMap != None:
 			for suitName, testSuit in testSuitMap.items():
 				testCaseArray = testSuit.testCaseArray
 				for testCase in testCaseArray:
 					if testCase.failInfo == None:
+						hasPassedCase = True
 						tr = self.createNode(NodeInfo('tr', None,[{'name':'class','value':'green'}]))
 						td = self.createNode(NodeInfo('td',suitName))
 						tr.appendChild(td)
@@ -169,7 +171,7 @@ class HtmlCreator:
 						td = self.createNode(NodeInfo('td',testCase.time))
 						tr.appendChild(td)	
 						tableNode.appendChild(tr)
-				if len(testCaseArray) == 0:
+				if not hasPassedCase:
 					tr = self.createNode(NodeInfo('tr'))
 					td = self.createNode(NodeInfo('td','Passed TestCase Results is empty',[{'name':'colspan','value':'3'}]))
 					tr.appendChild(td)		
@@ -201,11 +203,13 @@ class HtmlCreator:
 		
 		tableNode.appendChild(tr)		
 		
+		hasFailedCase = False
 		if testSuitMap != None:
 			for suitName, testSuit  in testSuitMap.items():				
 				testCaseArray = testSuit.testCaseArray
 				for testCase in testCaseArray:
-					if testCase.failInfo != None:										
+					if testCase.failInfo != None:
+						hasFailedCase = True										
 						tr = self.createNode(NodeInfo('tr',None,[{'name':'class','value':'red'}]))
 						td = self.createNode(NodeInfo('td',suitName))
 						tr.appendChild(td)
@@ -218,12 +222,12 @@ class HtmlCreator:
 						td = self.createNode(NodeInfo('td',testCase.time))
 						tr.appendChild(td)	
 						tableNode.appendChild(tr)
-		else:
-			tr = self.createNode(NodeInfo('tr'))
-			td = self.createNode(NodeInfo('td','Failed TestCase Results is empty'),[{'name':'colspan','value':'5'}])
-			tr.appendChild(td)		
-			tableNode.appendChild(tr)
-			
+				if not hasFailedCase:
+					tr = self.createNode(NodeInfo('tr'))
+					td = self.createNode(NodeInfo('td','Failed TestCase Results is empty',[{'name':'colspan','value':'5'}]))
+					tr.appendChild(td)		
+					tableNode.appendChild(tr)
+					
 		self.body.appendChild(tableNode)
 
 	
