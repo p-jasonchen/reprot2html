@@ -86,8 +86,12 @@ class TestControler:
                             action = adb_action.AdbAction(testSuit.name + '#' + case, testRunner)
                             adbActionArray.append(action)
 
-            print 'adbActionArray length:\t' + str(len(adbActionArray))
+            print 'total test case  size is:\t' + str(len(adbActionArray))
+            print 'starting to exec test ...'
+            curCase = 1
             for action in adbActionArray:
+                print 'executing test case ' + str(curCase)
+                curCase += 1
                 action.executeTest()
                 self.Report_File_Array.append(action.executePullTestResultFile())
 
@@ -104,4 +108,5 @@ if __name__ == '__main__':
     controler.doTest()
     controler.createHtmlResult()
     print 'test finished...'
+    print 'view  test  result file "report.html"'
     

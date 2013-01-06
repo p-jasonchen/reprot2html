@@ -35,7 +35,7 @@ class AdbAction:
             line = p.stdout.readline()
             if(line != None and len(line)>3):
                 print line                               
-            print p.stdout.read()
+            #print p.stdout.read()
     
     def executePullTestResultFile(self):
         dstPath =  os.path.join(os.getcwd(), 'result')   

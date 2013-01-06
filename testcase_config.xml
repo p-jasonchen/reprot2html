@@ -2,7 +2,7 @@
 <!-- windows 系统下文件全路径举例：  D:\\python\\report2html\\result\\junit-report1.xml   -->
  <classes appPkg="com.example.demoapp" testPkg="com.example.demoapp.test" 
      appPath="D:\\python\\report2html\\DemoApp.apk" testAppPath="D:\\python\\report2html\\TestDemoApp.apk">
-	<class name="com.example.demoapp.test.TestOperation" repeat='1'> 
+	<class name="com.example.demoapp.test.TestOperation" repeat='10'> 
         <methods >
 			<include name="testOperationAdd" />
 
