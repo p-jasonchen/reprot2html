@@ -20,6 +20,8 @@ class TestCaseConfigInfo:
     def __init__(self):
         self.appPkg = None
         self.testPkg = None
+        self.appPath = None
+        self.testAppPath = None
         self.testSuits = []
         
 class TestCaseConfigParser:
@@ -37,13 +39,25 @@ class TestCaseConfigParser:
             if len(appPkg) > 0:
                 self.testCaseConfig.appPkg = appPkg
             else:
-                print 'package name of the apk to test must not be empty'
+                 print 'appPkg attri of the class tag must not be empty'
 
             testPkg = pkgInfo.getAttribute('testPkg')
             if len(testPkg) > 0:
                 self.testCaseConfig.testPkg = testPkg
             else:
-                print 'package name of the test apk  must not be empty'
+                 print 'testPkg attri of the class tag must not be empty'
+                
+            appPath = pkgInfo.getAttribute('appPath')
+            if len(appPkg) > 0:
+                self.testCaseConfig.appPath = appPath
+            else:
+                 print 'appPath attri of the class tag must not be empty'
+            
+            testAppPath = pkgInfo.getAttribute('testAppPath')
+            if len(testAppPath) > 0:
+                self.testCaseConfig.testAppPath = testAppPath
+            else:
+                print 'testAppPath attri of the class tag must not be empty'
 
         domTestSuits = pkgInfo.getElementsByTagName('class')
         
