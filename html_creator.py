@@ -60,6 +60,10 @@ class HtmlCreator:
 		tableNode = self.createNode(NodeInfo('table',None,[{'name':'class','value':'report_info'}]))
 		tr = self.createNode(NodeInfo('tr'))
 		
+		
+		th = self.createNode(NodeInfo('th','Phone'))
+		tr.appendChild(th)
+		
 		th = self.createNode(NodeInfo('th','Test Executor'))
 		tr.appendChild(th)
 		
@@ -75,6 +79,9 @@ class HtmlCreator:
 		tableNode.appendChild(tr)
 		
 		tr = self.createNode(NodeInfo('tr'))
+		
+		th = self.createNode(NodeInfo('td',reportInfo.device))
+		tr.appendChild(th)
 		
 		th = self.createNode(NodeInfo('td',reportInfo.exector))
 		tr.appendChild(th)

@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "test_controler.py", line 136, in <module>
+    controler.doTest()
+  File "test_controler.py", line 96, in doTest
+    ret = self.initPhoneEvn(configInfo)
+  File "test_controler.py", line 71, in initPhoneEvn
+    action.executeUninstallPkg(testPkg)
+  File "D:\python\report2html\adb_action.py", line 60, in executeUninstallPkg
+    self.showProcessLog(p)
+  File "D:\python\report2html\adb_action.py", line 35, in showProcessLog
+    line = p.stdout.readline()
+KeyboardInterrupt

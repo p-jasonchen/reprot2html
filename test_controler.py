@@ -5,11 +5,14 @@ import adb_action
 import result_parser
 import html_creator
 import os
-
+import device_info_parser
 class TestControler:   
     def __init__(self):
         self.dstPath =  os.path.join(os.getcwd(), 'result')    
         self.Report_File_Array = []
+        self.deviceName = None
+        self.serialNo = None
+        self.reportInfo = None
     def initPCEnv(self):    
         dstPath = self.dstPath
         if not os.path.exists(dstPath):
@@ -22,8 +25,33 @@ class TestControler:
                     try: os.remove(filePath)
                     except os.error:
                      pass
-    
+       
+        self.initPCEnv()        
+        
+    def checkDeviceAttached(self):
+        action = adb_action.AdbAction()
+        serialNo = action.getDeviceAttach()
+        devName = 'Unkonw'  
+       
+        if serialNo != None:
+             print 'device serialNo is:' + serialNo
+             devFileName = 'build.prop'
+             ok = action.getAttachDeviceDetail(serialNo,devFileName)
+             if ok:
+                 devParser = device_info_parser.DeviceInfoParser(devFileName)
+                 print 'get device info file successfully'
+                 self.deviceName = devParser.deviceInfo.getDisplayName()
+                 print 'device name is ' + self.deviceName
+             else:
+                 print 'failed to get device info file '
+        else:
+            print 'no device found ! Make sure at least one device attach'        
+        self.serialNo = serialNo
+        return serialNo
+        
     def initPhoneEvn(self, configInfo):
+        if self.checkDeviceAttached() == None:
+            return
         appPkg = configInfo.appPkg
         testPkg = configInfo.testPkg
         appPath = configInfo.appPath
@@ -31,29 +59,29 @@ class TestControler:
         
         
         ret = True
-        
-        action = adb_action.AdbAction()        
+        serialNo = self.serialNo
+        action = adb_action.AdbAction()
         if appPkg != None:
             print 'uninstalling package ' + appPkg + ' ...'
-            action.executeUninstallPkg(appPkg)
+            action.executeUninstallPkg(appPkg, serialNo)
         else:
             ret = False
             
         if testPkg != None:
             print 'uninstalling package ' + testPkg + ' ...'
-            action.executeUninstallPkg(testPkg)
+            action.executeUninstallPkg(testPkg, serialNo)
         else:
             ret = False
             
         if appPath != None:
             print 'installing app  ' + appPath + ' ...'
-            action.executeInstallPkg(appPath)
+            action.executeInstallPkg(appPath, serialNo)
         else:
             ret = False
         
         if testAppPath != None:
-            print 'uninstalling app ' + testAppPath + ' ...'
-            action.executeInstallPkg(testAppPath)
+            print 'installing app ' + testAppPath + ' ...'
+            action.executeInstallPkg(testAppPath, serialNo)
         else:
             ret = False
         
@@ -61,13 +89,13 @@ class TestControler:
         
 
         
-    def doTest(self):
-        self.initPCEnv()        
+    def doTest(self):        
         parser = testcase_config_parser.TestCaseConfigParser('testcase_config.xml')
         parser.doParse()
         configInfo = parser.testCaseConfig
         self.reportInfo = parser.reportInfo
         ret = self.initPhoneEvn(configInfo)
+        self.reportInfo.device= self.deviceName
         if not ret:
             print 'init phone env failed...'
             return
@@ -93,8 +121,8 @@ class TestControler:
             for action in adbActionArray:
                 print 'executing test case ' + str(curCase)
                 curCase += 1
-                action.executeTest()
-                self.Report_File_Array.append(action.executePullTestResultFile())
+                action.executeTest(self.serialNo)
+                self.Report_File_Array.append(action.executePullTestResultFile(self.serialNo))
 
     def createHtmlResult(self):
         resultParser = result_parser.ResultParser(self.dstPath)        
