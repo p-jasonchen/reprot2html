@@ -5,10 +5,16 @@ import adb_action
 import result_parser
 import html_creator
 import os
+import sys
 import device_info_parser
+
+mainPath = sys.path[0]
+
 class TestControler:   
-    def __init__(self):
-        self.dstPath =  os.path.join(os.getcwd(), 'result')    
+    def __init__(self):        
+        print 'path:    ' + mainPath
+        #print 'pwd:    ' + os.getcwd()
+        self.dstPath =  os.path.join(mainPath, 'result')    
         self.Report_File_Array = []
         self.deviceName = None
         self.serialNo = None
@@ -90,12 +96,14 @@ class TestControler:
 
         
     def doTest(self):        
-        parser = testcase_config_parser.TestCaseConfigParser('testcase_config.xml')
+        configFile = os.path.join(mainPath, 'testcase_config.xml')
+        parser = testcase_config_parser.TestCaseConfigParser(configFile)
         parser.doParse()
         configInfo = parser.testCaseConfig
         self.reportInfo = parser.reportInfo
         ret = self.initPhoneEvn(configInfo)
         self.reportInfo.device= self.deviceName
+        self.reportInfo.serialNo = self.serialNo
         if not ret:
             print 'init phone env failed...'
             return
@@ -136,6 +144,5 @@ if __name__ == '__main__':
     controler = TestControler()
     controler.doTest()
     controler.createHtmlResult()
-    print 'test finished...'
-    print 'view  test  result file "report.html"'
+    print 'test finished...'    
     

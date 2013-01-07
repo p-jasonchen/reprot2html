@@ -4,6 +4,9 @@ import xml.dom.minidom
 import codecs
 import result_parser
 import time
+import os
+import test_controler
+import re
 class NodeInfo:
 	def __init__(self,tag, value = None,attrArray = None):
 		self.tag = tag
@@ -13,6 +16,7 @@ class NodeInfo:
 class HtmlCreator:
 	def __init__(self, testSuitMap, reportInfo):
 		self.testSuitMap = testSuitMap
+		self.reportInfo = reportInfo
 		impl = xml.dom.minidom.getDOMImplementation()
 		dom = impl.createDocument(None, 'html', None)
 		body = dom.createElement('body')
@@ -283,7 +287,13 @@ class HtmlCreator:
 	
 
 	def saveHtmlDoc(self):
-		f = file('report.html', 'w')
+		reportInfo = self.reportInfo		
+		fileName = reportInfo.device + '_' + reportInfo.serialNo + '_report.html'	
+		#过滤文件名中的非法字符，这些不被系统接受	
+		fileName = re.sub(r'[\\/:*"<>?|]','',fileName)
+		fileName= os.path.join(test_controler.mainPath, fileName)
+		print 'report result file path:\t' + fileName
+		f = file(fileName, 'w')
 		writer = codecs.lookup('utf-8')[3](f)
 		self.dom.writexml(writer, encoding='utf-8')
 		writer.close()
