@@ -65,6 +65,10 @@ class TestConfigInfo:
             return self.testedPath + r'\\bin\\' + self.testedProName + '-' + self.targetType + '.apk'
         return None
     
+    def getTestProjectBuildXml(self):
+        if  self.testPath:
+            return self.testPath + r'\\build.xml';
+        return None
 class TestCaseConfigInfo:
     def __init__(self):
         self.testSuits = []
@@ -115,6 +119,6 @@ if __name__ == '__main__':
     print tc.testedPath
     print tc.testPkg
     print tc.testPath
-    print tc.customInfo
+    print tc.getTestProjectBuildXml()
             
         

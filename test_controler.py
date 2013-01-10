@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #coding=utf-8
 import testcase_config_parser
-import adb_action
+import process_action
 import result_parser
 import html_creator
 import os
@@ -19,6 +19,11 @@ class TestControler:
 		self.serialNo = None	
 		self.reportInfo = testcase_config_parser.ReportInfo()	
 		self.initPCEnv()
+		
+		tc = testcase_config_parser.TestConfigInfo()
+		tc.loadConfig('test.conf')
+		self.testConfigInfo = tc
+		
 	def initPCEnv(self):	
 		dstPath = self.dstPath
 		if not os.path.exists(dstPath):
@@ -32,10 +37,10 @@ class TestControler:
 					except os.error:
 					 pass
 	   
-		
+	
 		
 	def checkDeviceAttached(self):
-		action = adb_action.AdbAction()
+		action = process_action.AdbAction()
 		serialNo = action.getDeviceAttach()
 		devName = 'Unkonw'  
 	   
@@ -55,20 +60,24 @@ class TestControler:
 		self.serialNo = serialNo
 		return serialNo
 	
+	
+	
+	def compileTestProject(self):
+		compiler = process_action.ProjectCompileAction(self.testConfigInfo)
+		return compiler.doCompile()	
+	
 		
 	def initPhoneEvn(self):
 		if self.checkDeviceAttached() == None:
 			return
-		tc = testcase_config_parser.TestConfigInfo()
-		tc.loadConfig('test.conf')
-		self.testConfigInfo = tc
 		
+		tc = self.testConfigInfo
 		testPkg = tc.testPkg
 		testedPkg = tc.testedPkg		
 		
 		ret = True
 		serialNo = self.serialNo
-		action = adb_action.AdbAction()
+		action = process_action.AdbAction()
 		if testedPkg != None:
 			print 'uninstalling tested package ' + testedPkg + ' ...'
 			action.executeUninstallPkg(testedPkg, serialNo)
@@ -85,7 +94,7 @@ class TestControler:
 		if testedApk != None:
 			print 'installing tested app  ' + testedApk + ' ...'
 			action.executeInstallPkg(testedApk, serialNo)
-		else:
+		else:			
 			ret = False
 		
 		testApk = tc.getTestApkPath()
@@ -104,10 +113,8 @@ class TestControler:
 		parser = testcase_config_parser.TestCaseConfigParser(configFile)
 		parser.doParse()
 		configInfo = parser.testCaseConfig
-		#self.reportInfo = parser.reportInfo
-		ret = self.initPhoneEvn()
-		#self.reportInfo.device= self.deviceName
-		#self.reportInfo.serialNo = self.serialNo
+		#ret = self.compileTestProject()
+		ret = self.initPhoneEvn()		
 		if not ret:
 			print 'init phone env failed...'
 			return
@@ -119,12 +126,12 @@ class TestControler:
 				testCaseArray = testSuit.testCaseArray
 				if len(testCaseArray) == 0:
 					for i in range(0, repeat):
-						action = adb_action.AdbAction(testSuit.name, testRunner)   
+						action = process_action.AdbAction(testSuit.name, testRunner)   
 						adbActionArray.append(action)
 				else:
 					for case in testCaseArray:
 						for i in range(0, repeat):
-							action = adb_action.AdbAction(testSuit.name + '#' + case, testRunner)
+							action = process_action.AdbAction(testSuit.name + '#' + case, testRunner)
 							adbActionArray.append(action)
 
 			print 'total test case  size is:\t' + str(len(adbActionArray))
@@ -136,7 +143,7 @@ class TestControler:
 				action.executeTest(self.serialNo)
 				self.Report_File_Array.append(action.executePullTestResultFile(self.serialNo))
 		   
-				self.createHtmlResult() 
+			self.createHtmlResult() 
 	def createHtmlResult(self):
 		resultParser = result_parser.ResultParser(self.dstPath)		
 		resultParser.traverseAllResult(self.Report_File_Array)  
@@ -153,6 +160,6 @@ class TestControler:
 
 if __name__ == '__main__':
 	controler = TestControler()
-	controler.doTest()	
+	controler.doTest()
 	print 'test finished...'	
 	
