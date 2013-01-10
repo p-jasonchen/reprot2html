@@ -55,6 +55,8 @@ class ResultParser:
 						tc = TestCase(caseName, time)					
 						ts.testCaseArray.append(tc)	 
 						domFailure = domTestCase.getElementsByTagName('failure')
+						if domFailure.length == 0:
+							domFailure = domTestCase.getElementsByTagName('error')
 						if domFailure.length != 0:
 							type = domFailure[0].getAttribute('type')
 							message = domFailure[0].getAttribute('message')

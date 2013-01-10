@@ -28,8 +28,10 @@ class AdbAction:
 						'-e',
 						'class',
 						self.testSuit,
-						self.testRunner]		 
+						self.testRunner]	
+		#print 'cmd:\t' + ' '.join(commandLine)	 
 		p = subprocess.Popen(commandLine, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+		self.showProcessLog(p)
 		p.wait()
 	   
 
