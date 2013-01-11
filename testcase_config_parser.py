@@ -4,6 +4,7 @@ import xml.dom.minidom
 import time
 import ConfigParser
 import os
+import test_controler
 class TestSuitInfo:
     def __init__(self, name, repeat = 1):
         self.name = name
@@ -35,6 +36,10 @@ class TestConfigInfo:
         self.customInfo = None
     def loadConfig(self,file):
         cf = ConfigParser.ConfigParser()
+        
+        if not os.path.exists(file):
+            print 'test config file: ' + file + ' not exist'
+            return False
         cf.read(file)        
         
         optKey = 'tested_proj'
@@ -55,7 +60,8 @@ class TestConfigInfo:
             self.targetType = targetType
         if exector:
             self.exector = exector
-    
+            
+        return True
     def getTestApkPath(self):
         if  self.testPath and self.testProName:
             return self.testPath + r'\\bin\\' + self.testProName + '-' + self.targetType + '.apk'
@@ -67,7 +73,7 @@ class TestConfigInfo:
     
     def getTestProjectBuildXml(self):
         if  self.testPath:
-            return self.testPath + r'\\build.xml';
+            return self.testPath + '\\build.xml';
         return None
 class TestCaseConfigInfo:
     def __init__(self):
@@ -84,10 +90,12 @@ class TestCaseConfigParser:
     def __init__(self,file=None):
         self.cofigFile = file
         self.testCaseConfig = TestCaseConfigInfo()        
+    
     def doParse(self):
-        if(self.cofigFile == None):
-            print 'TestCase config file must not be null'
-            return
+        exist =  os.path.exists(self.cofigFile)
+        if(not exist):
+            print 'TestCase config file: ' + self.cofigFile + ' not exist'
+            return False
         dom = xml.dom.minidom.parse(self.cofigFile)        
         testInfo = dom.documentElement
        
@@ -106,15 +114,16 @@ class TestCaseConfigParser:
                 for domInclude in domIncludes:
                     testSuit.appendTestCase(domInclude.getAttribute('name'))
             self.testCaseConfig.testSuits.append(testSuit)        
-                
+        return True      
              
 if __name__ == '__main__':     
-    parser = TestCaseConfigParser('testcase_config.xml')
+    
+    parser = TestCaseConfigParser(os.path.join(test_controler.mainPath,'testcase_config.xml'))
     parser.doParse()   
     print parser.testCaseConfig.testSuits[0].name
     
     tc = TestConfigInfo()
-    tc.loadConfig('test.conf')
+    tc.loadConfig(os.path.join(test_controler.mainPath,'test.conf'))
     print tc.testedPkg
     print tc.testedPath
     print tc.testPkg

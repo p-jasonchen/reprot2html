@@ -1,28 +1,41 @@
 #! /usr/bin/env python
 #coding=utf-8
 import testcase_config_parser
-import process_action
+import adb_action
 import result_parser
 import html_creator
 import os
 import sys
+import shutil
 import device_info_parser
 
-mainPath = sys.path[0]
+mainPath = os.getcwd()
 
 class TestControler:   
-	def __init__(self):		
+	def __init__(self):			
 		print 'path:	' + mainPath		
 		self.dstPath =  os.path.join(mainPath, 'result')
 		self.Report_File_Array = []
 		self.deviceName = None
 		self.serialNo = None	
+		self.testConfigInfo = None
+		self.configInfo = None
 		self.reportInfo = testcase_config_parser.ReportInfo()	
 		self.initPCEnv()
+		self.ok = True
 		
 		tc = testcase_config_parser.TestConfigInfo()
-		tc.loadConfig('test.conf')
-		self.testConfigInfo = tc
+		ok = tc.loadConfig(os.path.join(mainPath,'test.conf'))
+		if ok:
+			self.testConfigInfo = tc		
+		self.ok = self.ok and ok
+		
+		configFile = os.path.join(mainPath, 'testcase_config.xml')
+		parser = testcase_config_parser.TestCaseConfigParser(configFile)
+		ok = parser.doParse()
+		if ok:
+			self.configInfo = parser.testCaseConfig		
+		self.ok = self.ok and ok
 		
 	def initPCEnv(self):	
 		dstPath = self.dstPath
@@ -40,7 +53,7 @@ class TestControler:
 	
 		
 	def checkDeviceAttached(self):
-		action = process_action.AdbAction()
+		action = adb_action.AdbAction()
 		serialNo = action.getDeviceAttach()
 		devName = 'Unkonw'  
 	   
@@ -63,7 +76,7 @@ class TestControler:
 	
 	
 	def compileTestProject(self):
-		compiler = process_action.ProjectCompileAction(self.testConfigInfo)
+		compiler = adb_action.ProjectCompileAction(self.testConfigInfo)
 		return compiler.doCompile()	
 	
 		
@@ -77,7 +90,7 @@ class TestControler:
 		
 		ret = True
 		serialNo = self.serialNo
-		action = process_action.AdbAction()
+		action = adb_action.AdbAction()
 		if testedPkg != None:
 			print 'uninstalling tested package ' + testedPkg + ' ...'
 			action.executeUninstallPkg(testedPkg, serialNo)
@@ -108,17 +121,15 @@ class TestControler:
 		
 
 		
-	def doTest(self):		
-		configFile = os.path.join(mainPath, 'testcase_config.xml')
-		parser = testcase_config_parser.TestCaseConfigParser(configFile)
-		parser.doParse()
-		configInfo = parser.testCaseConfig
-		#ret = self.compileTestProject()
+	def doTest(self):
+		if not self.ok:
+			return
 		ret = self.initPhoneEvn()		
 		if not ret:
 			print 'init phone env failed...'
 			return
 		adbActionArray = []
+		configInfo = self.configInfo
 		if self.testConfigInfo.testPkg != None:
 			testRunner = self.testConfigInfo.testPkg + '/com.zutubi.android.junitreport.JUnitReportTestRunner'
 			for testSuit in configInfo.testSuits:
@@ -126,12 +137,12 @@ class TestControler:
 				testCaseArray = testSuit.testCaseArray
 				if len(testCaseArray) == 0:
 					for i in range(0, repeat):
-						action = process_action.AdbAction(testSuit.name, testRunner)   
+						action = adb_action.AdbAction(testSuit.name, testRunner)   
 						adbActionArray.append(action)
 				else:
 					for case in testCaseArray:
 						for i in range(0, repeat):
-							action = process_action.AdbAction(testSuit.name + '#' + case, testRunner)
+							action = adb_action.AdbAction(testSuit.name + '#' + case, testRunner)
 							adbActionArray.append(action)
 
 			print 'total test case  size is:\t' + str(len(adbActionArray))
@@ -157,9 +168,16 @@ class TestControler:
 		htmlCreator = html_creator.HtmlCreator(resultParser.testSuitMap, reportInfo)
 		htmlCreator.saveHtmlDoc()
 		
-
+		self.copyCssFileToDst()
+		
+	def copyCssFileToDst(self):
+		fileName = 'report.css'
+		cssFile  = os.path.join(os.sys.path[0],fileName)
+		dstFile = os.path.join(mainPath,fileName)
+		shutil.copy(cssFile,  dstFile)
+		
 if __name__ == '__main__':
 	controler = TestControler()
-	controler.doTest()
+	controler.doTest()	
 	print 'test finished...'	
 	

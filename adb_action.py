@@ -29,7 +29,7 @@ class AdbAction:
 						'class',
 						self.testSuit,
 						self.testRunner]	
-		#print 'cmd:\t' + ' '.join(commandLine)	 
+		print 'cmd:\t' + ' '.join(commandLine)	 
 		p = subprocess.Popen(commandLine, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
 		self.showProcessLog(p)
 		p.wait()
@@ -40,8 +40,9 @@ class AdbAction:
 			line = p.stdout.readline()
 			if(line != None and len(line.strip())>0):
 				print line			  
-			#print p.stdout.read()	
-		
+			#print p.stdout.read()		
+	
+			
 	def executePullTestResultFile(self, serialNo):
 		dstPath =  os.path.join(test_controler.mainPath, 'result')   
 		if not os.path.exists(dstPath):
@@ -75,9 +76,17 @@ class AdbAction:
 					   serialNo,						   
 							'install', apkPath]
 		p = subprocess.Popen(commandLine, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
-		self.showProcessLog(p)
+		self.showProcessLog(p)		
+		ok = False
+		while p.poll() == None:
+		   line = p.stdout.readline()
+		   if(line != None):
+				end = line.lower().find('success')
+				if end >= 0:
+					ok = True					
+					break			
 		p.wait()
-	
+		return ok
 	
 	def getDeviceAttach(self):
 		commandLine = [AdbAction.ANDROID_PLATFORM_TOOLS_HOME + 'adb','devices']
@@ -87,7 +96,7 @@ class AdbAction:
 			line = p.stdout.readline()
 			if(line != None):
 				line  = line.strip()
-				end = line.find('device')
+				end = line.lower().find('device')
 				if end >= 0 and  end + 6 == len(line):
 					serialNo = line[0: end].strip()
 					break					
@@ -102,13 +111,43 @@ class AdbAction:
 		while p.poll() == None:
 		   line = p.stdout.readline()
 		   if(line != None):				
-				end = line.find('not exist')
+				end = line.lower().find('not exist')
 				if end >= 0:
 					ok = False					
 					break					
 		p.wait()
 		return ok
+
+class ProjectCompileAction:
+	ANT_HOME = "D:/guangping/apache-ant-1.8.2/bin/"
+	def __init__(self, testConfig):
+		self.testConfig = testConfig
+	
+	def doCompile(self):
+		return	
+		buildfile = self.testConfig.getTestProjectBuildXml()
+		if buildfile == None:
+			return False
+		commandLine = [ProjectCompileAction.ANT_HOME + 'ant',
+					   '-f', buildfile]		
+		p = subprocess.Popen(commandLine, stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
+		ok = True
+		while p.poll() == None:
+		   line = p.stdout.readline()
+		   if(line != None):				
+				end = line.lower().find('failed')
+				if end >= 0:
+					ok = False					
+					break					
+		p.wait()
+		return ok
+
+import testcase_config_parser
 if __name__ == '__main__':   
-	action = AdbAction('com.example.demoapp.test.TestOperation','com.example.demoapp.test/com.zutubi.android.junitreport.JUnitReportTestRunner')
+	tc = testcase_config_parser.TestConfigInfo()
+	tc.testPath = 'D:\\workspace\\TestDemoAppTest'
+	compiler = ProjectCompileAction(tc)
+	compiler.doCompile()
+	#action = AdbAction('com.example.demoapp.test.TestOperation','com.example.demoapp.test/com.zutubi.android.junitreport.JUnitReportTestRunner')
 	#action.executeTest('016B23BA0301E01B')
 	#action.executePullTestResultFile('016B23BA0301E01B')
